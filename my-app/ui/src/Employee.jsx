@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { endpoints } from './Endpoints';
 import moment from 'moment';
+import { Modal, Button } from 'react-bootstrap';
 
 const Employee = () => {
 
@@ -18,7 +19,17 @@ const Employee = () => {
     photoFilename: '',
     // photoPath: endpoints.PHOTO_URL
   });
-  const [photoPath, setPhotoPath] = useState(endpoints.PHOTO_URL);
+
+  const [photoPath, setPhotoPath] = useState('');
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+  useEffect(() => {
+    setPhotoPath(endpoints.PHOTO_URL);
+  }, []);
+
 
   const formatDoJ = (date) => {
     return moment(date).format('YYYY-MM-DD');
@@ -64,6 +75,7 @@ const Employee = () => {
   }
 
   const addClick = () => {
+    handleShow();
     setEmployeeInfo({
       modalTitle: 'Add Employee',
       employeeId: 0,
@@ -75,6 +87,7 @@ const Employee = () => {
   }
 
   const editClick = (emp) => {
+    handleShow();
     setEmployeeInfo({
       modalTitle: 'Edit Employee',
       employeeId: emp.employeeId,
@@ -153,45 +166,26 @@ const Employee = () => {
 
   const imageUpload = (e) => {
     e.preventDefault();
-    // const data = new FormData();
-    // data.append('file', e.target.files[0]);
-    // data.append('filename', e.target.files[0].name);  
 
-    // fetch(endpoints.API_URL + 'employee/savefile', {
-    //   method: 'POST',
-    //   body: data,
-    // })
-    //   .then(res => res.json())
-    //   .then((data) => {
-    //     setEmployeeInfo({
-    //       ...employeeInfo,
-    //       photoFilename: data
-    //     });
-    //     setPhotoPath(endpoints.PHOTO_URL + result);
-    //   }, (error) => {
-    //     alert('Failed');
-    //   })
+    const formData = new FormData();
+    formData.append("file", e.target.files[0], e.target.files[0].name);
+    console.log(e.target.files[0].name)
 
-      const formData=new FormData();
-        formData.append("file",e.target.files[0],e.target.files[0].name);
-
-        fetch(endpoints.API_URL+'employee/savefile',{
-            method:'POST',
-            body:formData
-        })
-        .then(res=>res.json())
-        .then(data=>{
-            // this.setState({PhotoFileName:data});
-            setEmployeeInfo({
-              ...employeeInfo,
-              photoFilename: data
-            });
-            
-        })
+    fetch(endpoints.API_URL + 'employee/savefile', {
+      method: 'POST',
+      body: formData
+    })
+      .then(res => res.json())
+      .then(data => {
+        setEmployeeInfo({
+          ...employeeInfo,
+          photoFilename: data
+        });
+        // setPhotoPath(endpoints.PHOTO_URL + data);
+      }, (error) => {
+        alert('Failed');
+      })
   }
-
-
-
 
   return (
     <div>
@@ -200,8 +194,6 @@ const Employee = () => {
       <button
         type="button"
         className="btn btn-primary m-2 float-end"
-        data-bs-toggle="modal"
-        data-bs-target="#exampleModal"
         onClick={addClick}
       >
         Add Department
@@ -228,8 +220,6 @@ const Employee = () => {
                 <button
                   type="button"
                   className="btn btn-light m-1"
-                  data-bs-toggle="modal"
-                  data-bs-target="#exampleModal"
                   onClick={() => editClick(emp)}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil-square" viewBox="0 0 16 16">
@@ -249,7 +239,78 @@ const Employee = () => {
         </tbody>
       </table>
 
-      <div className="modal fade" id="exampleModal" tabIndex="-1" aria-hidden="true">
+      <Modal show={show} onHide={handleClose} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>{employeeInfo.modalTitle}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="d-flex flex-grow bd-highlight mb-3">
+
+            <div className="p-2 w-50 bd-highlight">
+              <div className="input-group mb-3">
+                <span className="input-group-text">Employee Name</span>
+                <input type="text" className="form-control" value={employeeInfo.employeeName} onChange={changeEmployeeName} />
+              </div>
+
+              <div className="input-group mb-3">
+                <span className="input-group-text">Department</span>
+                <select
+                  className="form-select"
+                  value={employeeInfo.department}
+                  onChange={changeDepartment}
+                >
+                  {departments.map((dep) => (
+                    <option key={dep.departmentId}>
+                      {dep.departmentName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="input-group mb-3">
+                <span className="input-group-text">Date of Joining</span>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={formatDoJ(employeeInfo.dateOfJoining)}
+                  onChange={changeDateOfJoining}
+                />
+              </div>
+
+
+            </div>
+            <div className="p-2 w-50 bd-highlight">
+              <img
+                width="250px"
+                height="250px"
+                src={photoPath + '' ? photoPath + employeeInfo.photoFilename : 'noPhoto.jpg'}
+                alt={employeeInfo.photoFilename}
+              />
+
+              <input className="m-2" type="file" onChange={imageUpload} />
+
+            </div>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+          {employeeInfo.employeeId === 0 ?
+            <Button variant="primary" onClick={createClick}>
+              Add Employee
+            </Button>
+            : null}
+
+          {employeeInfo.employeeId !== 0 ?
+            <Button variant="primary" onClick={updateClick}>
+              Update Employee
+            </Button>
+            : null}
+        </Modal.Footer>
+      </Modal>
+
+      {/* <div className="modal fade" id="exampleModal" tabIndex="-1" aria-hidden="true">
         <div className="modal-dialog modal-lg modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
@@ -282,11 +343,11 @@ const Employee = () => {
 
                   <div className="input-group mb-3">
                     <span className="input-group-text">Date of Joining</span>
-                    <input 
-                      type="date" 
-                      className="form-control" 
-                      value={formatDoJ(employeeInfo.dateOfJoining)} 
-                      onChange={changeDateOfJoining} 
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={formatDoJ(employeeInfo.dateOfJoining)}
+                      onChange={changeDateOfJoining}
                     />
                   </div>
 
@@ -296,7 +357,7 @@ const Employee = () => {
                   <img
                     width="250px"
                     height="250px"
-                    src={photoPath + employeeInfo.photoFilename}
+                    src={photoPath + '' ? photoPath + employeeInfo.photoFilename : 'noPhoto.jpg'}
                     alt={employeeInfo.photoFilename}
                   />
 
@@ -312,12 +373,10 @@ const Employee = () => {
                 <button type="button" className="btn btn-primary" onClick={updateClick}>Update Employee</button>
                 : null}
 
-
-
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   )
 
