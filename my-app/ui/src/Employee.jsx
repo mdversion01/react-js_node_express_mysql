@@ -16,8 +16,7 @@ const Employee = () => {
     employeeName: '',
     department: '',
     dateOfJoining: '',
-    photoFilename: '',
-    // photoPath: endpoints.PHOTO_URL
+    photoFilename: ''
   });
 
   const [photoPath, setPhotoPath] = useState('');
@@ -81,7 +80,7 @@ const Employee = () => {
       employeeId: 0,
       employeeName: '',
       department: '',
-      dateOfJoining: '',
+      dateOfJoining: formatDoJ(),
       photoFilename: 'anonymous.png'
     });
   }
@@ -179,7 +178,7 @@ const Employee = () => {
       .then(data => {
         setEmployeeInfo({
           ...employeeInfo,
-          photoFilename: data
+          photoFilename: data || ''
         });
         // setPhotoPath(endpoints.PHOTO_URL + data);
       }, (error) => {
@@ -249,18 +248,28 @@ const Employee = () => {
             <div className="p-2 w-50 bd-highlight">
               <div className="input-group mb-3">
                 <span className="input-group-text">Employee Name</span>
-                <input type="text" className="form-control" value={employeeInfo.employeeName} onChange={changeEmployeeName} />
+                <input
+                  type="text"
+                  className="form-control"
+                  value={employeeInfo.employeeName}
+                  onChange={changeEmployeeName}
+                />
+
               </div>
 
               <div className="input-group mb-3">
                 <span className="input-group-text">Department</span>
                 <select
                   className="form-select"
-                  value={employeeInfo.department}
+                  defaultValue={employeeInfo.department}
                   onChange={changeDepartment}
                 >
+                  <option value="">Select Department</option>
                   {departments.map((dep) => (
-                    <option key={dep.departmentId}>
+                    <option
+                      key={dep.departmentId}
+                      value={dep.departmentName}
+                    >
                       {dep.departmentName}
                     </option>
                   ))}
@@ -276,8 +285,6 @@ const Employee = () => {
                   onChange={changeDateOfJoining}
                 />
               </div>
-
-
             </div>
             <div className="p-2 w-50 bd-highlight">
               <img
@@ -286,9 +293,7 @@ const Employee = () => {
                 src={photoPath + '' ? photoPath + employeeInfo.photoFilename : 'noPhoto.jpg'}
                 alt={employeeInfo.photoFilename}
               />
-
               <input className="m-2" type="file" onChange={imageUpload} />
-
             </div>
           </div>
         </Modal.Body>
@@ -309,74 +314,6 @@ const Employee = () => {
             : null}
         </Modal.Footer>
       </Modal>
-
-      {/* <div className="modal fade" id="exampleModal" tabIndex="-1" aria-hidden="true">
-        <div className="modal-dialog modal-lg modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">{employeeInfo.modalTitle}</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div className="modal-body">
-              <div className="d-flex flex-grow bd-highlight mb-3">
-
-                <div className="p-2 w-50 bd-highlight">
-                  <div className="input-group mb-3">
-                    <span className="input-group-text">Employee Name</span>
-                    <input type="text" className="form-control" value={employeeInfo.employeeName} onChange={changeEmployeeName} />
-                  </div>
-
-                  <div className="input-group mb-3">
-                    <span className="input-group-text">Department</span>
-                    <select
-                      className="form-select"
-                      value={employeeInfo.department}
-                      onChange={changeDepartment}
-                    >
-                      {departments.map((dep) => (
-                        <option key={dep.departmentId}>
-                          {dep.departmentName}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="input-group mb-3">
-                    <span className="input-group-text">Date of Joining</span>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={formatDoJ(employeeInfo.dateOfJoining)}
-                      onChange={changeDateOfJoining}
-                    />
-                  </div>
-
-
-                </div>
-                <div className="p-2 w-50 bd-highlight">
-                  <img
-                    width="250px"
-                    height="250px"
-                    src={photoPath + '' ? photoPath + employeeInfo.photoFilename : 'noPhoto.jpg'}
-                    alt={employeeInfo.photoFilename}
-                  />
-
-                  <input className="m-2" type="file" onChange={imageUpload} />
-
-                </div>
-              </div>
-              {employeeInfo.employeeId === 0 ?
-                <button type="button" className="btn btn-primary" onClick={createClick}>Add Employee</button>
-                : null}
-
-              {employeeInfo.employeeId !== 0 ?
-                <button type="button" className="btn btn-primary" onClick={updateClick}>Update Employee</button>
-                : null}
-
-            </div>
-          </div>
-        </div>
-      </div> */}
     </div>
   )
 
